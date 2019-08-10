@@ -33,7 +33,7 @@ class CropImage():
                     self.openAnnotation(self.path_annotation_train)
                 else:
                     self.openAnnotation(self.path_annotation_test)
-        except expression as identifier:
+        except:
             self.openAnnotation(self.path_annotation_test)
 
         img = cv2.imread(os.path.join(self.path_source, *args, name))
@@ -47,8 +47,6 @@ class CropImage():
         if(not os.path.exists(path)):
             os.makedirs(path)
         cv2.imwrite(os.path.join(self.path_destination, *args, name), crop_img)
-        # cv2.imshow("cropped", crop_img)
-        # cv2.waitKey(0)
 
     def crawl(self):
         if(os.path.exists(self.path_destination)):
