@@ -67,7 +67,7 @@ test_generator = train_datagen.flow_from_directory(path_test,  # this is where y
                                                    shuffle=True)
 
 tfboard = TensorBoard(log_dir="logs/{}".format(runningN), histogram_freq=0,
-                      batch_size=batch_size, write_images=True, write_graph=True, write_grads=True)
+                      batch_size=batch_size, write_images=True, write_graph=True)
 
 model.compile(optimizer='Adam', loss='categorical_crossentropy',
               metrics=['accuracy'])
