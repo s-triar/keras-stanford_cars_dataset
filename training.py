@@ -7,7 +7,9 @@ import matplotlib.pyplot as plt
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.applications.resnet50 import ResNet50
 from keras.applications.vgg19 import VGG19
+from keras.applications.inception_resnet_v2 import InceptionResNetV2
 from keras.applications.mobilenet import MobileNet
+from keras.applications.mobilenetv2 import MobileNetV2
 from keras.preprocessing import image
 
 from keras.applications.mobilenet import preprocess_input
@@ -20,27 +22,29 @@ from keras.callbacks import TensorBoard
 import math
 
 
-runningN = "ResNet50_"+str(time())
-# path_train = 'G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/cropped/car_data/train'
-path_train = '/media/DISK8gb/cropped/car_data/train'
-# path_test = 'G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/cropped/car_data/train'
-path_test = '/media/DISK8gb/cropped/car_data/test'
-epochs = 1000
-batch_size = 8
+runningN = "MobileNetV2"+str(time())
+path_train = 'G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/cropped/car_data/train'
+# path_train = '/media/DISK8gb/cropped/car_data/train'
+path_test = 'G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/car_data/test'
+# path_test = '/media/DISK8gb/cropped/car_data/test'
+epochs = 50
+batch_size = 32
 
 
 # imports the mobilenet model and discards the last 1000 neuron layer.
-base_model = MobileNet(weights='imagenet', include_top=False)
+base_model = MobileNetV2(weights='imagenet', include_top=False)
 x = base_model.output
 x = GlobalAveragePooling2D()(x)
-x = Dense(1024, activation='relu', name="dense1")(x)
-x = Dense(1024, activation='relu', name="dense2")(x)
-x = Dense(512, activation='relu', name="dense3")(x)
+x = Dense(2048, activation='relu', name="dense1")(x)
+x = Dense(1536, activation='relu', name="dense2")(x)
+x = Dense(1024, activation='relu', name="dense3")(x)
 preds = Dense(196, activation='softmax', name="dense4-c")(x)
 
 model = Model(inputs=base_model.input, outputs=preds)
 
-for layer in model.layers:
+for layer in model.layers[:-4]:
+    layer.trainable = False
+for layer in model.layers[-4:]:
     layer.trainable = True
 
 model.summary()
@@ -62,7 +66,7 @@ test_generator = train_datagen.flow_from_directory(path_test,  # this is where y
                                                    class_mode='categorical',
                                                    shuffle=True)
 
-tfboard = TensorBoard(log_dir="logs/{}".format(), histogram_freq=1,
+tfboard = TensorBoard(log_dir="logs/{}".format(runningN), histogram_freq=0,
                       batch_size=batch_size, write_images=True, write_graph=True, write_grads=True)
 
 model.compile(optimizer='Adam', loss='categorical_crossentropy',
