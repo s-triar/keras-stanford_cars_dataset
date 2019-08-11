@@ -12,6 +12,9 @@ class CropImage():
         self.path_annotation_train = path_annotation_train
         self.annotation = None
         self.check = ""
+    
+    def run(self):
+        return self.crawl()
 
     def printProgressBar(self, iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█'):
         percent = ("{0:." + str(decimals) + "f}").format(100 *
@@ -82,16 +85,18 @@ class CropImage():
             return "crop process is finished"
 
 
-# path untuk dataset asli - dari folder parent test dan train
-source = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/car_data"
-# path untuk dataset hasil crop dengan annotation
-destination = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/cropped/car_data"
-# path annotation dataset test
-# jika test dan train jadi satu isi dengan annotation test
-anno_test = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/anno_test.csv"
-# path annotation dataset train
-anno_train = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/anno_train.csv"
 
-a = CropImage(source, destination, anno_test, anno_train)
-res = a.crawl()
-print(res)
+
+# # path untuk dataset asli - dari folder parent test dan train
+# source = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/car_data"
+# # path untuk dataset hasil crop dengan annotation
+# destination = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/cropped/car_data"
+# # path annotation dataset test
+# # jika test dan train jadi satu isi dengan annotation test
+# anno_test = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/anno_test.csv"
+# # path annotation dataset train
+# anno_train = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/anno_train.csv"
+
+# a = CropImage(source, destination, anno_test, anno_train)
+# res = a.crawl()
+# print(res)

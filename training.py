@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.applications.resnet50 import ResNet50
 from keras.applications.vgg19 import VGG19
-from keras.applications.inception_resnet_v2 import InceptionResNetV2
 from keras.applications.mobilenet import MobileNet
 from keras.applications.mobilenetv2 import MobileNetV2
 from keras.preprocessing import image
@@ -21,68 +20,88 @@ from time import time
 from keras.callbacks import TensorBoard
 import math
 
-
-runningN = "MobileNetV2"+str(time())
-path_train = 'G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/cropped/car_data/train'
-# path_train = '/media/DISK8gb/cropped/car_data/train'
-path_test = 'G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/car_data/test'
-# path_test = '/media/DISK8gb/cropped/car_data/test'
-epochs = 50
-batch_size = 32
+models = {
+    "resnet50": ResNet50(weights='imagenet', include_top=False),
+    "vgg19": VGG19(weights='imagenet', include_top=False),
+    "mobilenet": MobileNet(weights='imagenet', include_top=False),
+    "mobilenetv2": MobileNetV2(weights='imagenet', include_top=False)
+}
 
 
-# imports the mobilenet model and discards the last 1000 neuron layer.
-base_model = MobileNetV2(weights='imagenet', include_top=False)
-x = base_model.output
-x = GlobalAveragePooling2D()(x)
-x = Dense(2048, activation='relu', name="dense1")(x)
-x = Dense(1536, activation='relu', name="dense2")(x)
-x = Dense(1024, activation='relu', name="dense3")(x)
-preds = Dense(196, activation='softmax', name="dense4-c")(x)
+class DeepLearning_training():
 
-model = Model(inputs=base_model.input, outputs=preds)
+    def __init__(self, runningN, path_train, path_test, epochs, batch_size, model):
+        self.runningN = runningN+str(time())
+        self.path_train = path_train
+        self.path_test = path_test
+        self.epochs = epochs
+        self.batch_size = batch_size
+        self.model_name = model
 
-for layer in model.layers[:-4]:
-    layer.trainable = False
-for layer in model.layers[-4:]:
-    layer.trainable = True
+        self._defineGenerator()
+        self._defineModel()
+        self._defineBoard()
+        
 
-model.summary()
+    def _defineModel(self):
+        # imports the mobilenet model and discards the last 1000 neuron layer.
+        base_model = models[self.model_name]
+        x = base_model.output
+        x = GlobalAveragePooling2D()(x)
+        x = Dense(2048, activation='relu', name="dense1")(x)
+        x = Dense(1536, activation='relu', name="dense2")(x)
+        x = Dense(1024, activation='relu', name="dense3")(x)
+        preds = Dense(196, activation='softmax', name="dense4-c")(x)
 
+        self.model = Model(inputs=base_model.input, outputs=preds)
 
-train_datagen = ImageDataGenerator(
-    preprocessing_function=preprocess_input)  # included in our dependencies
+        for layer in self.model.layers[:-4]:
+            layer.trainable = False
+        for layer in self.model.layers[-4:]:
+            layer.trainable = True
 
-train_generator = train_datagen.flow_from_directory(path_train,  # this is where you specify the path to the main data folder
-                                                    target_size=(224, 224),
-                                                    color_mode='rgb',
-                                                    batch_size=batch_size,
-                                                    class_mode='categorical',
-                                                    shuffle=True)
-test_generator = train_datagen.flow_from_directory(path_test,  # this is where you specify the path to the main data folder
-                                                   target_size=(224, 224),
-                                                   color_mode='rgb',
-                                                   batch_size=batch_size,
-                                                   class_mode='categorical',
-                                                   shuffle=True)
+        self.model.compile(optimizer='Adam', loss='categorical_crossentropy',
+                           metrics=['accuracy'])
 
-tfboard = TensorBoard(log_dir="logs/{}".format(runningN), histogram_freq=0,
-                      batch_size=batch_size, write_images=True, write_graph=True)
+        self.model.summary()
 
-model.compile(optimizer='Adam', loss='categorical_crossentropy',
-              metrics=['accuracy'])
+    def _defineGenerator(self):
+        self.train_datagen = ImageDataGenerator(
+            preprocessing_function=preprocess_input)  # included in our dependencies
 
-step_size_train = train_generator.n//train_generator.batch_size
-v_steps = math.ceil(test_generator.n / batch_size)
-model.fit_generator(generator=train_generator,
-                    steps_per_epoch=step_size_train,
-                    epochs=epochs,
-                    validation_data=test_generator,
-                    validation_steps=v_steps,
-                    callbacks=[tfboard]
-                    )
-test_loss, test_acc = model.evaluate_generator(
-    generator=train_generator, steps=24)
-print(test_loss)
-print(test_acc)
-model.save(runningN+".h5")
+        self.train_generator = self.train_datagen.flow_from_directory(self.path_train,  # this is where you specify the path to the main data folder
+                                                                      target_size=(
+                                                                          224, 224),
+                                                                      color_mode='rgb',
+                                                                      batch_size=self.batch_size,
+                                                                      class_mode='categorical',
+                                                                      shuffle=True)
+        self.test_generator = self.train_datagen.flow_from_directory(self.path_test,  # this is where you specify the path to the main data folder
+                                                                     target_size=(
+                                                                         224, 224),
+                                                                     color_mode='rgb',
+                                                                     batch_size=self.batch_size,
+                                                                     class_mode='categorical',
+                                                                     shuffle=True)
+
+    def _defineBoard(self):
+
+        self.tfboard = TensorBoard(log_dir="logs/{}".format(self.runningN), histogram_freq=0,
+                                   batch_size=self.batch_size, write_images=True, write_graph=True)
+
+    def run_training(self):
+
+        self.step_size_train = self.train_generator.n//self.train_generator.batch_size
+        self.v_steps = math.ceil(self.test_generator.n / self.batch_size)
+        self.model.fit_generator(generator=self.train_generator,
+                                 steps_per_epoch=self.step_size_train,
+                                 epochs=self.epochs,
+                                 validation_data=self.test_generator,
+                                 validation_steps=self.v_steps,
+                                 callbacks=[self.tfboard]
+                                 )
+        test_loss, test_acc = self.model.evaluate_generator(
+            generator=self.train_generator, steps=24)
+        print(test_loss)
+        print(test_acc)
+        self.model.save(self.runningN+".h5")
