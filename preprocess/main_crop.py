@@ -11,5 +11,4 @@ anno_test = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/anno_test.
 anno_train = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/anno_train.csv"
 
 prep = CropImage(source, destination, anno_test, anno_train)
-prep_res = prep.run()
-print(prep_res)
+prep.run()
