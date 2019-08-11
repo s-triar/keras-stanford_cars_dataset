@@ -44,7 +44,6 @@ class DeepLearning_training():
         
 
     def _defineModel(self):
-        # imports the mobilenet model and discards the last 1000 neuron layer.
         base_model = models[self.model_name]
         x = base_model.output
         x = GlobalAveragePooling2D()(x)
@@ -67,16 +66,16 @@ class DeepLearning_training():
 
     def _defineGenerator(self):
         self.train_datagen = ImageDataGenerator(
-            preprocessing_function=preprocess_input)  # included in our dependencies
+            preprocessing_function=preprocess_input)  
 
-        self.train_generator = self.train_datagen.flow_from_directory(self.path_train,  # this is where you specify the path to the main data folder
+        self.train_generator = self.train_datagen.flow_from_directory(self.path_train,  
                                                                       target_size=(
                                                                           224, 224),
                                                                       color_mode='rgb',
                                                                       batch_size=self.batch_size,
                                                                       class_mode='categorical',
                                                                       shuffle=True)
-        self.test_generator = self.train_datagen.flow_from_directory(self.path_test,  # this is where you specify the path to the main data folder
+        self.test_generator = self.train_datagen.flow_from_directory(self.path_test,  
                                                                      target_size=(
                                                                          224, 224),
                                                                      color_mode='rgb',
@@ -105,3 +104,15 @@ class DeepLearning_training():
         print(test_loss)
         print(test_acc)
         self.model.save(self.runningN+".h5")
+
+        plt.style.use("ggplot")
+        plt.figure()
+        plt.plot(np.arange(0, self.epochs), self.model.history["loss"], label="train_loss")
+        plt.plot(np.arange(0, self.epochs), self.model.history["val_loss"], label="val_loss")
+        plt.plot(np.arange(0, self.epochs), self.model.history["acc"], label="train_acc")
+        plt.plot(np.arange(0, self.epochs), self.model.history["val_acc"], label="val_acc")
+        plt.title("Training Loss and Accuracy on Dataset")
+        plt.xlabel("Epoch #")
+        plt.ylabel("Loss/Accuracy")
+        plt.legend(loc="lower left")
+        plt.savefig("plot.png")
