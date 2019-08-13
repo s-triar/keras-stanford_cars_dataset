@@ -47,10 +47,10 @@ class DeepLearning_training():
         base_model = models[self.model_name]
         x = base_model.output
         x = GlobalAveragePooling2D()(x)
-        x = Dense(2048, activation='relu', name="dense1")(x)
-        x = Dense(1536, activation='relu', name="dense2")(x)
+        x = Dense(1536, activation='relu', name="dense1")(x)
+        x = Dense(2048, activation='relu', name="dense2")(x)
         x = Dense(1024, activation='relu', name="dense3")(x)
-        preds = Dense(196, activation='softmax', name="dense4-c")(x)
+        preds = Dense(5, activation='softmax', name="dense4-c")(x) #196 jika memakai dataset stanford cars
 
         self.model = Model(inputs=base_model.input, outputs=preds)
 
@@ -100,19 +100,7 @@ class DeepLearning_training():
                                  callbacks=[self.tfboard]
                                  )
         test_loss, test_acc = self.model.evaluate_generator(
-            generator=self.train_generator, steps=24)
-        print(test_loss)
-        print(test_acc)
+            generator=self.test_generator, steps=v_steps)
+        print("validation loss:",test_loss)
+        print("validation accuracy:",test_acc)
         self.model.save(self.runningN+".h5")
-
-        plt.style.use("ggplot")
-        plt.figure()
-        plt.plot(np.arange(0, self.epochs), self.model.history["loss"], label="train_loss")
-        plt.plot(np.arange(0, self.epochs), self.model.history["val_loss"], label="val_loss")
-        plt.plot(np.arange(0, self.epochs), self.model.history["acc"], label="train_acc")
-        plt.plot(np.arange(0, self.epochs), self.model.history["val_acc"], label="val_acc")
-        plt.title("Training Loss and Accuracy on Dataset")
-        plt.xlabel("Epoch #")
-        plt.ylabel("Loss/Accuracy")
-        plt.legend(loc="lower left")
-        plt.savefig("plot.png")

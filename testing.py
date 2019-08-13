@@ -25,9 +25,14 @@ class DeepLearning_testing():
                                                                         shuffle=True)
     
     def predict(self):
+        step_size_train = self.test_generator.n//self.test_generator.batch_size
         filenames = self.test_generator.filenames
         nb_samples = len(filenames)
-        return self.model.predict_generator(self.test_generator,steps = nb_samples)
+        pred= self.model.predict_generator(self.test_generator,steps = nb_samples)
+        test_loss, test_acc = self.model.evaluate_generator(
+            generator=self.test_generator, steps=step_size_train)
+        # print(test_loss, test_acc )
+        return pred, test_loss, test_acc
         
         
     

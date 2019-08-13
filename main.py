@@ -11,9 +11,10 @@ def main_learning(runningN, path_train, path_test, epochs, batch_size, model):
 
 def main_testing(path_model, path_test, batch_size):
     testing = DeepLearning_testing(path_model, path_test, batch_size)
-    prediction = testing.predict()
-    print(prediction)
-
+    prediction, test_loss, test_acc = testing.predict()
+    print("prediction", prediction)
+    print("test loss", test_loss)
+    print("test accuracy", test_acc)
 
 if __name__ == "__main__":
     # path untuk dataset asli - dari folder parent test dan train
@@ -26,12 +27,13 @@ if __name__ == "__main__":
     # path annotation dataset train
     anno_train = "G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/anno_train.csv"
 
+
     # path untuk data training
-    path_train = 'G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/cropped/car_data/train'
+    path_train = './data/train'
     # path untuk data testing
-    path_test = 'G:/dataset_mobil/stanford2-car-dataset-by-classes-folder/car_data/test'
+    path_test = './data/test'
     # jumlah epoch
-    epochs = 50
+    epochs = 200
     # ukuran batch
     batch_size = 32
     # nama model yang digunakan. Ada: mobilenet, mobilenetv2, vgg19, resnet50
@@ -39,13 +41,14 @@ if __name__ == "__main__":
     # nama running learning. Digunakan untuk nama pada hasil model dan visualisasi di tensorboard 
     run_name = model
     # path model yang sudah ditraining
-    path_model = 'G:/DTSTask/project1_classifier/models/MobileNetV21565453004.3961172.h5'
+    path_model = './models/mobilenetv2_car_indo1565703295.8897007.h5'
 
     # melakukan proses training jika true, jika tidak melakukan proses testing
-    train = False
+    train = True
     if(train):
-        prep = CropImage(source, destination, anno_test, anno_train)
-        prep.run()
+        # crop hanya jika memakai data stanford cars dataset
+        # prep = CropImage(source, destination, anno_test, anno_train)
+        # prep.run()
         main_learning(run_name, path_train, path_test,
                       epochs, batch_size, model)
     else:
